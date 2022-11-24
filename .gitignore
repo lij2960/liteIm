@@ -1,0 +1,11 @@
+.idea/
+*.exe
+*.exe~
+~*
+tests
+test
+.DS_Store
+docs
+config/local.ini
+tmp
+pack
