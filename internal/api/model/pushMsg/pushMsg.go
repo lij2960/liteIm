@@ -9,6 +9,7 @@ package pushMsgModel
 
 import (
 	"liteIm/internal/im"
+	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
 	"time"
 )
@@ -25,10 +26,15 @@ type PushMsgRequest struct {
 
 func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
 	pushData := &im.PushToUser{
-		ToUniqueId:   requestData.ToUniqueId,
-		FromUniqueId: requestData.FromUniqueId,
-		Message:      requestData.Data,
-		Time:         time.Now().Unix(),
+		DataCommon: imCommon.DataCommon{
+			MessageType: imCommon.MessageTypeText,
+		},
+		Data: &im.PushToUserData{
+			ToUniqueId:   requestData.ToUniqueId,
+			FromUniqueId: requestData.FromUniqueId,
+			Message:      requestData.Data,
+			Time:         time.Now().Unix(),
+		},
 	}
 	err := pushData.Deal()
 	if err != nil {

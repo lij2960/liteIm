@@ -10,7 +10,7 @@ package common
 type Response struct {
 	Code int         `json:"code"`
 	Msg  string      `json:"msg"`
-	Data interface{} `json:"data"`
+	Data interface{} `json:"data,omitempty"`
 }
 
 // 运行模式定义

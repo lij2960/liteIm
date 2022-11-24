@@ -9,6 +9,7 @@ package im
 
 import (
 	"github.com/gorilla/websocket"
+	"liteIm/pkg/logs"
 	"sync"
 )
 
@@ -42,6 +43,7 @@ func delConnClients(uniqueID string, client *Client) {
 	connLock.RLock()
 	defer connLock.RUnlock()
 	new(Client).del(client)
+	logs.Info("disconnect client:", uniqueID)
 	delete(connClients, uniqueID)
 }
 

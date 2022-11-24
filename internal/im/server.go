@@ -11,7 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"liteIm/internal/im/msgDeal"
+	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
 	"liteIm/pkg/config"
 	"liteIm/pkg/logs"
@@ -21,40 +21,34 @@ import (
 
 type Server struct{}
 
-type RunWsResponse struct {
-	common.Response
-}
-
 func RunWS(w http.ResponseWriter, r *http.Request) {
-	res := new(RunWsResponse)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logs.Error("upgrader.Upgrade", err)
 		return
 	}
+	re := new(imCommon.DataCommon)
+	re.MessageType = imCommon.MessageTypeReceipt
+	resData := new(common.Response)
 	client := new(Client).connEdit(conn)
 	query := r.URL.Query()
 	uniqueId := ""
 	if len(query["unique_id"]) != 0 {
 		uniqueId = query["unique_id"][0]
 	} else {
-		res = &RunWsResponse{
-			common.Response{
-				Code: 1,
-				Msg:  "must param for user unique id",
-				Data: nil,
-			},
-		}
-		resData, _ := json.Marshal(res)
-		_ = pushMsg(client, resData)
+		resData.Msg = "must param for user unique id"
+		re.Data = resData
+		rr, _ := json.Marshal(re)
+		_ = pushMsg(client, rr)
 		_ = client.conn.Close()
 		client = nil
 		return
 	}
 	addConnClients(uniqueId, client)
-	res.Msg = "success"
-	resData, _ := json.Marshal(res)
-	_ = pushMsg(client, resData)
+	resData.Msg = "success"
+	re.Data = resData
+	rr, _ := json.Marshal(re)
+	_ = pushMsg(client, rr)
 	readMsg(uniqueId, client)
 }
 
@@ -87,10 +81,13 @@ func readMsg(uniqueId string, client *Client) {
 		logs.Info("message type:", messageType, string(msg))
 		if messageType == websocket.PingMessage {
 			logs.Info("ping")
-			res := new(common.Response)
-			res.Msg = "pong"
-			resData, _ := json.Marshal(res)
-			_ = pushMsg(client, resData)
+			res := new(imCommon.DataCommon)
+			res.MessageType = imCommon.MessageTypeReceipt
+			resData := new(common.Response)
+			resData.Msg = "pong"
+			res.Data = resData
+			r, _ := json.Marshal(res)
+			_ = pushMsg(client, r)
 			return
 		}
 		if err != nil {
@@ -98,7 +95,7 @@ func readMsg(uniqueId string, client *Client) {
 			delConnClients(uniqueId, client)
 			return
 		}
-		res := new(msgDeal.Test).Deal(uniqueId, msg)
+		res := new(MsgDeal).Deal(msg)
 		resData, _ := json.Marshal(res)
 		err = pushToUser(uniqueId, resData)
 		if err != nil {
