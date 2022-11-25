@@ -12,6 +12,11 @@ type DataCommon struct {
 	Data        interface{} `json:"data,omitempty"`
 }
 
+// ReplaceVariable 替换变量
+const (
+	ReplaceVariable = "__VARIABLE__" // 通用替换变量
+)
+
 // 消息类型定义
 const (
 	MessageTypeReceipt   = 1 // 回执消息
@@ -20,5 +25,4 @@ const (
 	MessageTypeImg       = 4 // 图片消息
 	MessageTypeVideo     = 5 // 视频消息
 	MessageTypeAudio     = 6 // 音频消息
-	MessageTypeSystem    = 7 // 系统消息
 )

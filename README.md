@@ -30,6 +30,7 @@
    post方式推送地址：http://127.0.0.1:8080/pushMsg
    body体参数：
    {
+    "message_type":3,
     "to_unique_ids":["1"],
     "from_unique_id":"2",
     "data":"test"
@@ -51,7 +52,7 @@
    {
     "message_type":3,
     "data":{
-        "to_unique_ids":["2"],
+        "to_unique_id":"2",
         "from_unique_id":"3",
         "message":"hello"
     }

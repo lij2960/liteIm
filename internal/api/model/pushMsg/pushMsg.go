@@ -21,8 +21,9 @@ type PushMsg struct {
 }
 
 type PushMsgRequest struct {
-	ToUniqueIds  []string `json:"to_unique_ids"`
-	FromUniqueId string   `json:"from_unique_id"`
+	MessageType  int      `json:"message_type"`
+	ToUniqueIds  []string `json:"to_unique_ids"`  // 空数组表示推送给所有人
+	FromUniqueId string   `json:"from_unique_id"` // 空字符串表示为系统消息
 	Data         string   `json:"data"`
 }
 
@@ -42,21 +43,26 @@ func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
 	logs.Info("---PushToUser-----")
 	push := &PushData{
 		DataCommon: imCommon.DataCommon{
-			MessageType: imCommon.MessageTypeText,
+			MessageType: requestData.MessageType,
 		},
 		Data: &PushDataDetail{
-			ToUniqueId:   "",
+			ToUniqueId:   imCommon.ReplaceVariable,
 			FromUniqueId: requestData.FromUniqueId,
 			Message:      requestData.Data,
 			Time:         time.Now().Unix(),
 		},
 	}
-	for _, val := range requestData.ToUniqueIds {
-		go func(val string, push *PushData) {
-			push.Data.ToUniqueId = val
-			pushData, _ := json.Marshal(push)
-			_ = im.PushToUser(val, pushData)
-		}(val, push)
+	if len(requestData.ToUniqueIds) == 0 { // 推送给所有人
+		pushData, _ := json.Marshal(push)
+		go im.PushToAll(string(pushData))
+	} else { // 推送给指定人员
+		for _, val := range requestData.ToUniqueIds {
+			go func(val string, push *PushData) {
+				push.Data.ToUniqueId = val
+				pushData, _ := json.Marshal(push)
+				_ = im.PushToUser(val, pushData)
+			}(val, push)
+		}
 	}
 	return p
 }

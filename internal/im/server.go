@@ -17,6 +17,7 @@ import (
 	"liteIm/pkg/config"
 	"liteIm/pkg/logs"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -111,5 +112,22 @@ func PushToUser(uniqueId string, data []byte) (err error) {
 		return err
 	} else {
 		return pushMsg(client, data)
+	}
+}
+
+// PushToAll 给所有在线人员推送消息
+func PushToAll(data string) {
+	connLock.Lock()
+	defer connLock.Unlock()
+	for uniqueId, client := range connClients {
+		go func(val *Client, data string, uniqueId string) {
+			data = strings.Replace(data, imCommon.ReplaceVariable, uniqueId, -1)
+			err := pushMsg(val, []byte(data))
+			if err != nil {
+				new(Client).del(val)
+				logs.Info("disconnect client:", uniqueId)
+				delete(connClients, uniqueId)
+			}
+		}(client, data, uniqueId)
 	}
 }
