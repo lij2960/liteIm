@@ -40,5 +40,17 @@ func (r *Register) Deal(requestData *RegisterRequest) *Register {
 		r.Msg = "添加用户失败"
 		return r
 	}
+	// 添加用户详情
+	userInfo := &userService.UserInfo{
+		UserId:         requestData.UniqueId,
+		GroupIds:       nil,
+		ManageGroupIds: nil,
+	}
+	err = userInfo.Set()
+	if err != nil {
+		r.Code = common.RequestStatusError
+		r.Msg = "添加用户详情失败"
+		return r
+	}
 	return r
 }

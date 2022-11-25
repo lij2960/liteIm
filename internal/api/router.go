@@ -30,6 +30,12 @@ func (router *Router) Deal(w http.ResponseWriter, r *http.Request) {
 	router.Post("/user/register", w, r, controller.Register)
 	router.Post("/user/remove", w, r, controller.Remove)
 
+	// 用户组操作
+	router.Post("/user/groupCreate", w, r, controller.GroupCreate)
+	router.Post("/user/groupJoin", w, r, controller.GroupJoin)
+	router.Post("/user/groupTransfer", w, r, controller.GroupTransfer)
+	router.Post("/user/groupRemove", w, r, controller.GroupRemove)
+
 	if !router.exist {
 		w.WriteHeader(http.StatusNotFound)
 	}

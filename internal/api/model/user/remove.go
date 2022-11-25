@@ -40,5 +40,27 @@ func (r *Remove) Deal(requestData *RemoveRequest) *Remove {
 		r.Msg = "移除用户失败"
 		return r
 	}
+	// 获取用户详情
+	userInfoSer := new(userService.UserInfo)
+	userInfo, err := userInfoSer.Get(requestData.UniqueId)
+	if err != nil {
+		r.Code = common.RequestStatusError
+		r.Msg = "获取用户详情失败"
+		return r
+	}
+	// 移除用户组用户
+	if userInfo.GroupIds != nil {
+		for _, val := range userInfo.GroupIds {
+			_ = new(userService.Group).DelUser(val, requestData.UniqueId)
+		}
+	}
+	// 解散用户创建的用户组
+	if userInfo.ManageGroupIds != nil {
+		for _, val := range userInfo.ManageGroupIds {
+			_ = new(userService.Group).Del(val)
+			// 删除用户组管理
+			_ = new(userService.GroupManage).Del(val)
+		}
+	}
 	return r
 }

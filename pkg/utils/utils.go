@@ -17,3 +17,25 @@ func GetNowDateTime() string {
 	result := tm.Format("2006-01-02 15:04:05")
 	return result
 }
+
+// DeleteSliceString 删除字符串切片指定元素。
+func DeleteSliceString(a []string, elem string) []string {
+	j := 0
+	for _, v := range a {
+		if v != elem {
+			a[j] = v
+			j++
+		}
+	}
+	return a[:j]
+}
+
+// CheckInStringSlice 查看字符串是否在切片内
+func CheckInStringSlice(a []string, elem string) bool {
+	for _, val := range a {
+		if val == elem {
+			return true
+		}
+	}
+	return false
+}
