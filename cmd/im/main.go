@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	var addr = flag.String("addr", ":"+config.Config.Section(config.Env).Key("port").String(), "")
+	var addr = flag.String("addr", ":"+config.Config.Section("").Key("port").String(), "")
 	logs.Info("addr:", *addr)
 	// 建立连接
 	http.HandleFunc("/", api.Router)

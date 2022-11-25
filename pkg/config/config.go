@@ -30,17 +30,6 @@ func configInit() {
 		fmt.Println(utils.GetNowDateTime(), "ini.Load", err)
 		return
 	}
-	var configFile []interface{}
-	for _, val := range Config.Section("conFile").Keys() {
-		fileName := Config.Section("conFile").Key(val.Name()).String()
-		configFile = append(configFile, "config/"+fileName)
-	}
-	fmt.Println(utils.GetNowDateTime(), "---", configFile)
-	Config, err = ini.Load("config/config.ini", configFile...)
-	if err != nil {
-		fmt.Println(utils.GetNowDateTime(), "ini.Load", err)
-		return
-	}
 
 	// 读取系统变量的运行模式，优先采用系统变量的运行模式
 	sysEnv := os.Getenv("imRunMode")
@@ -49,6 +38,18 @@ func configInit() {
 		Env = sysEnv
 	} else {
 		Env = Config.Section("").Key("mode").String()
+	}
+
+	var configFile []interface{}
+	for _, val := range Config.Section(Env).Keys() {
+		fileName := Config.Section(Env).Key(val.Name()).String()
+		configFile = append(configFile, "config/"+fileName)
+	}
+	fmt.Println(utils.GetNowDateTime(), "---", configFile)
+	Config, err = ini.Load("config/config.ini", configFile...)
+	if err != nil {
+		fmt.Println(utils.GetNowDateTime(), "ini.Load", err)
+		return
 	}
 
 	// 设置gin的运行模式

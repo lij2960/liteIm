@@ -55,7 +55,7 @@ func RunWS(w http.ResponseWriter, r *http.Request) {
 func pushMsg(client *Client, data []byte) (err error) {
 	client.lock.Lock()
 	defer client.lock.Unlock()
-	writeWait, _ := config.Config.Section(config.Env).Key("imWriteWait").Int()
+	writeWait, _ := config.Config.Section("").Key("imWriteWait").Int()
 	err = client.conn.SetWriteDeadline(time.Now().Add(time.Duration(writeWait) * time.Second))
 	if err != nil {
 		err = fmt.Errorf("write wait time set err")
@@ -73,8 +73,8 @@ func pushMsg(client *Client, data []byte) (err error) {
 
 // 读取socket消息
 func readMsg(uniqueId string, client *Client) {
-	maxMessageSize, _ := config.Config.Section(config.Env).Key("imReadMaxMessageSize").Int64()
-	readWait, _ := config.Config.Section(config.Env).Key("imReadMaxMessageSize").Int64()
+	maxMessageSize, _ := config.Config.Section("").Key("imReadMaxMessageSize").Int64()
+	readWait, _ := config.Config.Section("").Key("imReadMaxMessageSize").Int64()
 	client.conn.SetReadLimit(maxMessageSize)
 	_ = client.conn.SetWriteDeadline(time.Now().Add(time.Duration(readWait) * time.Second))
 	for {
