@@ -32,11 +32,13 @@ func (m *MsgDeal) Deal(msg []byte) any {
 		res := new(msgDeal.Receipt).Get(common.RequestStatusOk, "pong", imCommon.MessageTypeHeartBeat)
 		return res
 	case imCommon.MessageTypeText: // 文字信息
-		push, uniqueId := new(msgDeal.Text).Deal(data.Data)
+		push, uniqueIds := new(msgDeal.Text).Deal(data.Data)
 		push.MessageType = imCommon.MessageTypeText
 		// 给用户推送消息
 		pushData, _ := json.Marshal(push)
-		go pushToUser(uniqueId, pushData)
+		for _, val := range uniqueIds {
+			go PushToUser(val, pushData)
+		}
 		res := new(msgDeal.Receipt).Get(common.RequestStatusOk, "", imCommon.MessageTypeReceipt)
 		return res
 	default:

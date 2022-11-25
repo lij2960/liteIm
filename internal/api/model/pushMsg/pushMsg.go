@@ -8,9 +8,11 @@
 package pushMsgModel
 
 import (
+	"encoding/json"
 	"liteIm/internal/im"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
+	"liteIm/pkg/logs"
 	"time"
 )
 
@@ -19,27 +21,42 @@ type PushMsg struct {
 }
 
 type PushMsgRequest struct {
+	ToUniqueIds  []string `json:"to_unique_ids"`
+	FromUniqueId string   `json:"from_unique_id"`
+	Data         string   `json:"data"`
+}
+
+type PushData struct {
+	imCommon.DataCommon
+	Data *PushDataDetail `json:"data"`
+}
+
+type PushDataDetail struct {
 	ToUniqueId   string `json:"to_unique_id"`
 	FromUniqueId string `json:"from_unique_id"`
-	Data         string `json:"data"`
+	Message      string `json:"message"`
+	Time         int64  `json:"time"`
 }
 
 func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
-	pushData := &im.PushToUser{
+	logs.Info("---PushToUser-----")
+	push := &PushData{
 		DataCommon: imCommon.DataCommon{
 			MessageType: imCommon.MessageTypeText,
 		},
-		Data: &im.PushToUserData{
-			ToUniqueId:   requestData.ToUniqueId,
+		Data: &PushDataDetail{
+			ToUniqueId:   "",
 			FromUniqueId: requestData.FromUniqueId,
 			Message:      requestData.Data,
 			Time:         time.Now().Unix(),
 		},
 	}
-	err := pushData.Deal()
-	if err != nil {
-		p.Code = common.RequestStatusError
-		p.Msg = err.Error()
+	for _, val := range requestData.ToUniqueIds {
+		go func(val string, push *PushData) {
+			push.Data.ToUniqueId = val
+			pushData, _ := json.Marshal(push)
+			_ = im.PushToUser(val, pushData)
+		}(val, push)
 	}
 	return p
 }

@@ -93,15 +93,15 @@ func readMsg(uniqueId string, client *Client) {
 		}
 		res := new(MsgDeal).Deal(msg)
 		resData, _ := json.Marshal(res)
-		err = pushToUser(uniqueId, resData)
+		err = PushToUser(uniqueId, resData)
 		if err != nil {
 			delConnClients(uniqueId, client)
 		}
 	}
 }
 
-// 给单用户推送消息
-func pushToUser(uniqueId string, data []byte) (err error) {
+// PushToUser 给单用户推送消息
+func PushToUser(uniqueId string, data []byte) (err error) {
 	logs.Info("-----", uniqueId)
 	connLock.RLock()
 	defer connLock.RUnlock()

@@ -14,22 +14,22 @@ import (
 )
 
 type Text struct {
-	ToUniqueId   string `json:"to_unique_id"`
-	FromUniqueId string `json:"from_unique_id"`
-	Message      string `json:"message"`
-	Time         int64  `json:"time"`
+	ToUniqueIds  []string `json:"to_unique_ids"`
+	FromUniqueId string   `json:"from_unique_id"`
+	Message      string   `json:"message"`
+	Time         int64    `json:"time"`
 }
 
 type TextResponse struct {
 	imCommon.DataCommon
 }
 
-func (t *Text) Deal(data any) (res *TextResponse, uniqueId string) {
+func (t *Text) Deal(data any) (res *TextResponse, uniqueId []string) {
 	dataJson, _ := json.Marshal(data)
 	_ = json.Unmarshal(dataJson, &t)
 	t.Time = time.Now().Unix()
 	res = new(TextResponse)
 	res.MessageType = imCommon.MessageTypeText
 	res.Data = t
-	return res, t.ToUniqueId
+	return res, t.ToUniqueIds
 }
