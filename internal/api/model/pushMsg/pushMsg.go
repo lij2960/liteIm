@@ -38,7 +38,7 @@ func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
 	}
 	err := pushData.Deal()
 	if err != nil {
-		p.Code = 1
+		p.Code = common.RequestStatusError
 		p.Msg = err.Error()
 	}
 	return p

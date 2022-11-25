@@ -10,6 +10,7 @@ package controller
 import (
 	"encoding/json"
 	pushMsgModel "liteIm/internal/api/model/pushMsg"
+	"liteIm/pkg/common"
 	"net/http"
 )
 
@@ -19,12 +20,12 @@ func PushMsg(w http.ResponseWriter, r *http.Request) {
 	req := new(pushMsgModel.PushMsg)
 	body, err := getBody(r)
 	if err != nil {
-		req.Code = 1
+		req.Code = common.RequestStatusError
 		req.Msg = "post data get error"
 	} else {
 		err = json.Unmarshal(body, &requestData)
 		if err != nil {
-			req.Code = 1
+			req.Code = common.RequestStatusError
 			req.Msg = "post data parse error"
 		} else {
 			req = req.Deal(requestData)

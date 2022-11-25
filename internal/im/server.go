@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	imCommon "liteIm/internal/im/common"
+	"liteIm/internal/im/msgDeal"
 	"liteIm/pkg/common"
 	"liteIm/pkg/config"
 	"liteIm/pkg/logs"
@@ -27,27 +28,24 @@ func RunWS(w http.ResponseWriter, r *http.Request) {
 		logs.Error("upgrader.Upgrade", err)
 		return
 	}
-	re := new(imCommon.DataCommon)
-	re.MessageType = imCommon.MessageTypeReceipt
-	resData := new(common.Response)
 	client := new(Client).connEdit(conn)
 	query := r.URL.Query()
 	uniqueId := ""
 	if len(query["unique_id"]) != 0 {
 		uniqueId = query["unique_id"][0]
 	} else {
-		resData.Msg = "must param for user unique id"
-		re.Data = resData
-		rr, _ := json.Marshal(re)
+		err = fmt.Errorf("must param for user unique id")
+		logs.Error("RunWS", err)
+		res := new(msgDeal.Receipt).Get(common.RequestStatusError, err.Error(), imCommon.MessageTypeReceipt)
+		rr, _ := json.Marshal(res)
 		_ = pushMsg(client, rr)
 		_ = client.conn.Close()
 		client = nil
 		return
 	}
 	addConnClients(uniqueId, client)
-	resData.Msg = "success"
-	re.Data = resData
-	rr, _ := json.Marshal(re)
+	res := new(msgDeal.Receipt).Get(common.RequestStatusOk, "", imCommon.MessageTypeReceipt)
+	rr, _ := json.Marshal(res)
 	_ = pushMsg(client, rr)
 	readMsg(uniqueId, client)
 }
@@ -60,11 +58,13 @@ func pushMsg(client *Client, data []byte) (err error) {
 	err = client.conn.SetWriteDeadline(time.Now().Add(time.Duration(writeWait) * time.Second))
 	if err != nil {
 		err = fmt.Errorf("write wait time set err")
+		logs.Error("pushMsg-SetWriteDeadline", err)
 		return err
 	}
 	err = client.conn.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
 		err = fmt.Errorf("NextWriter error")
+		logs.Error("pushMsg-WriteMessage", err)
 		return err
 	}
 	return nil
@@ -79,20 +79,16 @@ func readMsg(uniqueId string, client *Client) {
 	for {
 		messageType, msg, err := client.conn.ReadMessage()
 		logs.Info("message type:", messageType, string(msg))
-		if messageType == websocket.PingMessage {
-			logs.Info("ping")
-			res := new(imCommon.DataCommon)
-			res.MessageType = imCommon.MessageTypeReceipt
-			resData := new(common.Response)
-			resData.Msg = "pong"
-			res.Data = resData
-			r, _ := json.Marshal(res)
-			_ = pushMsg(client, r)
-			return
-		}
 		if err != nil {
 			logs.Error("readMsg err:", err, uniqueId)
 			delConnClients(uniqueId, client)
+			return
+		}
+		if messageType == websocket.PingMessage {
+			logs.Info("ping")
+			res := new(msgDeal.Receipt).Get(common.RequestStatusOk, "pong", imCommon.MessageTypeHeartBeat)
+			r, _ := json.Marshal(res)
+			_ = pushMsg(client, r)
 			return
 		}
 		res := new(MsgDeal).Deal(msg)

@@ -34,4 +34,26 @@
     "from_unique_id":"2",
     "data":"test"
    }
+   
+   心跳参数示例：
+   请求地址：ws://127.0.0.1:8080/ws?unique_id=1
+   body参数：
+   {
+    "message_type":2,
+    "data":{
+        "message":"ping"
+    }
+   }
+   
+   socket消息发送示例：
+   请求地址：ws://127.0.0.1:8080/ws?unique_id=1
+   body参数：
+   {
+    "message_type":3,
+    "data":{
+        "to_unique_id":"2",
+        "from_unique_id":"3",
+        "message":"hello"
+    }
+   }
    ```

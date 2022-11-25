@@ -19,3 +19,9 @@ const (
 	RunModeTest = "test"
 	RunModeProd = "prod"
 )
+
+// 请求错误定义
+const (
+	RequestStatusOk    = 0
+	RequestStatusError = 1
+)

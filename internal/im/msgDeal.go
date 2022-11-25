@@ -18,40 +18,31 @@ import (
 
 type MsgDeal struct{}
 
-func (m *MsgDeal) Deal(msg []byte) (res *imCommon.DataCommon) {
-	receipt := new(common.Response)
+func (m *MsgDeal) Deal(msg []byte) any {
 	data := new(imCommon.DataCommon)
 	err := json.Unmarshal(msg, &data)
 	if err != nil {
-		logs.Error("MsgDeal-Unmarshal", err)
-		receipt.Code = 1
-		receipt.Msg = "request data unmarshal error"
-		data.Data = receipt
-		data.MessageType = imCommon.MessageTypeReceipt
-		return data
+		err = fmt.Errorf("request data unmarshal error")
+		logs.Error("MsgDeal-Deal", err)
+		res := new(msgDeal.Receipt).Get(common.RequestStatusError, err.Error(), imCommon.MessageTypeReceipt)
+		return res
 	}
 	switch data.MessageType {
 	case imCommon.MessageTypeHeartBeat: // 心跳
-		receipt.Msg = "pong"
-		data.Data = receipt
-		data.MessageType = imCommon.MessageTypeReceipt
-		return data
+		res := new(msgDeal.Receipt).Get(common.RequestStatusOk, "pong", imCommon.MessageTypeHeartBeat)
+		return res
 	case imCommon.MessageTypeText: // 文字信息
 		push, uniqueId := new(msgDeal.Text).Deal(data.Data)
 		push.MessageType = imCommon.MessageTypeText
 		// 给用户推送消息
 		pushData, _ := json.Marshal(push)
 		go pushToUser(uniqueId, pushData)
-		data.MessageType = imCommon.MessageTypeReceipt
-		data.Data = receipt
-		return data
+		res := new(msgDeal.Receipt).Get(common.RequestStatusOk, "", imCommon.MessageTypeReceipt)
+		return res
 	default:
 		err = fmt.Errorf("request message type error")
 		logs.Error("MsgDeal-MessageType", err, data.MessageType)
-		receipt.Code = 1
-		receipt.Msg = err.Error()
-		data.Data = receipt
-		data.MessageType = imCommon.MessageTypeReceipt
-		return data
+		res := new(msgDeal.Receipt).Get(common.RequestStatusError, err.Error(), imCommon.MessageTypeReceipt)
+		return res
 	}
 }
