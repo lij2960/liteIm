@@ -12,40 +12,39 @@ import (
 	"net/http"
 )
 
-func Router(w http.ResponseWriter, r *http.Request) {
-	router := new(RouterFilter)
-	router.Post("/pushMsg", w, r, controller.PushMsg)
-}
-
 type RouterInterface interface {
 	Get(path string, w http.ResponseWriter, r *http.Request, handle func(w http.ResponseWriter, r *http.Request))
 	Post(path string, w http.ResponseWriter, r *http.Request, handle func(w http.ResponseWriter, r *http.Request))
 }
 
-type RouterFilter struct {
+type Router struct {
+	exist bool
 	RouterInterface
 }
 
-func (rt *RouterFilter) Get(path string, w http.ResponseWriter, r *http.Request, handle func(w http.ResponseWriter, r *http.Request)) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "not found", http.StatusNotFound)
-		return
-	}
-	if r.URL.Path == path {
-		handle(w, r)
-	} else {
-		http.Error(w, "not found", http.StatusNotFound)
+func (router *Router) Deal(w http.ResponseWriter, r *http.Request) {
+	router.exist = false
+	router.Post("/pushMsg", w, r, controller.PushMsg)
+
+	// 用户操作
+	router.Post("/user/register", w, r, controller.Register)
+	router.Post("/user/remove", w, r, controller.Remove)
+
+	if !router.exist {
+		w.WriteHeader(http.StatusNotFound)
 	}
 }
 
-func (rt *RouterFilter) Post(path string, w http.ResponseWriter, r *http.Request, handle func(w http.ResponseWriter, r *http.Request)) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "not found", http.StatusNotFound)
-		return
-	}
-	if r.URL.Path == path {
+func (router *Router) Get(path string, w http.ResponseWriter, r *http.Request, handle func(w http.ResponseWriter, r *http.Request)) {
+	if r.Method == http.MethodGet && r.URL.Path == path {
+		router.exist = true
 		handle(w, r)
-	} else {
-		http.Error(w, "not found", http.StatusNotFound)
+	}
+}
+
+func (router *Router) Post(path string, w http.ResponseWriter, r *http.Request, handle func(w http.ResponseWriter, r *http.Request)) {
+	if r.Method == http.MethodPost && r.URL.Path == path {
+		router.exist = true
+		handle(w, r)
 	}
 }

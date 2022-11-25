@@ -11,16 +11,21 @@ import (
 	"flag"
 	"liteIm/internal/api"
 	"liteIm/internal/im"
+	"liteIm/pkg/common"
 	"liteIm/pkg/config"
 	"liteIm/pkg/logs"
 	"net/http"
 )
 
+func init() {
+	common.InitRedis()
+}
+
 func main() {
 	var addr = flag.String("addr", ":"+config.Config.Section("").Key("port").String(), "")
 	logs.Info("addr:", *addr)
 	// 建立连接
-	http.HandleFunc("/", api.Router)
+	http.HandleFunc("/", new(api.Router).Deal)
 	http.HandleFunc("/ws", im.RunWS)
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {

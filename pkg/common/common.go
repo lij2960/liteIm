@@ -13,6 +13,11 @@ type Response struct {
 	Data interface{} `json:"data,omitempty"`
 }
 
+// 配置模块定义
+const (
+	ConfigSectionRedisClient = "redis"
+)
+
 // 运行模式定义
 const (
 	RunModeDev  = "dev"
