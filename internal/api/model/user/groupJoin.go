@@ -10,6 +10,7 @@ package userModel
 import (
 	userService "liteIm/internal/api/model/user/service"
 	"liteIm/pkg/common"
+	"liteIm/pkg/utils"
 )
 
 type GroupJoin struct {
@@ -41,6 +42,12 @@ func (g *GroupJoin) Deal(requestData *GroupJoinRequest) *GroupJoin {
 	if exist == 0 {
 		g.Code = common.RequestStatusError
 		g.Msg = "用户组不存在"
+		return g
+	}
+	// 检查用户是否已加入用户组
+	if utils.CheckInStringSlice(userInfo.GroupIds, requestData.GroupId) || utils.CheckInStringSlice(userInfo.ManageGroupIds, requestData.GroupId) {
+		g.Code = common.RequestStatusError
+		g.Msg = "用户已是该用户组成员"
 		return g
 	}
 	userInfo.GroupIds = append(userInfo.GroupIds, requestData.GroupId)

@@ -10,6 +10,7 @@ package userModel
 import (
 	userService "liteIm/internal/api/model/user/service"
 	"liteIm/pkg/common"
+	"liteIm/pkg/logs"
 	"liteIm/pkg/utils"
 )
 
@@ -38,7 +39,8 @@ func (g *GroupTransfer) Deal(requestData *GroupTransferRequest) *GroupTransfer {
 		g.Msg = "该用户不是此用户组的管理员"
 		return g
 	}
-	transferUserInfo, err := userSer.Get(requestData.ToUniqueId)
+	toUserSer := new(userService.UserInfo)
+	transferUserInfo, err := toUserSer.Get(requestData.ToUniqueId)
 	if err != nil {
 		g.Code = common.RequestStatusError
 		g.Msg = "获取被转移用户信息失败"
@@ -57,18 +59,31 @@ func (g *GroupTransfer) Deal(requestData *GroupTransferRequest) *GroupTransfer {
 		g.Msg = "用户组不存在"
 		return g
 	}
+	// 验证被转移用户是否是群成员
+	existToUser, err := groupSer.ExistUser(requestData.GroupId, requestData.ToUniqueId)
+	if err != nil {
+		g.Code = common.RequestStatusError
+		g.Msg = "验证被转移用户失败"
+		return g
+	}
+	if !existToUser {
+		g.Code = common.RequestStatusError
+		g.Msg = "被转移用户不是群成员"
+		return g
+	}
 	if len(userInfo.ManageGroupIds) == 1 {
 		userInfo.ManageGroupIds = nil
 	} else {
 		userInfo.ManageGroupIds = utils.DeleteSliceString(userInfo.ManageGroupIds, requestData.GroupId)
 	}
-	err = userSer.Set()
+	logs.Info("----", *userInfo)
+	err = userInfo.Set()
 	if err != nil {
 		g.Code = common.RequestStatusError
 		g.Msg = "转移用户组权限失败"
 		return g
 	}
-	transferUserInfo.GroupIds = append(transferUserInfo.GroupIds, requestData.GroupId)
+	transferUserInfo.ManageGroupIds = append(transferUserInfo.ManageGroupIds, requestData.GroupId)
 	err = transferUserInfo.Set()
 	if err != nil {
 		g.Code = common.RequestStatusError

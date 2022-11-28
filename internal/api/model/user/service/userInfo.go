@@ -23,6 +23,7 @@ type UserInfo struct {
 func (u *UserInfo) Set() error {
 	key := getUserInfoKey(u.UserId)
 	data, _ := json.Marshal(u)
+	logs.Info("=====", string(data))
 	_, err := common.RedisClient.Set(key, string(data), -1).Result()
 	if err != nil {
 		logs.Error("UserInfo-Set", err)

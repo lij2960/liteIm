@@ -66,7 +66,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, req)
 }
 
-// GroupCreate 用户组创建，请求数据格式：
+// GroupCreate 用户组创建，请求数据格式：{"unique_id":"3","group_id":"1"}
 func GroupCreate(w http.ResponseWriter, r *http.Request) {
 	requestData := new(userModel.GroupCreateRequest)
 	req := new(userModel.GroupCreate)
@@ -91,7 +91,7 @@ func GroupCreate(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, req)
 }
 
-// GroupJoin 用户组加入，请求数据格式：
+// GroupJoin 用户组加入，请求数据格式：{"unique_id":"2","group_id":"1"}
 func GroupJoin(w http.ResponseWriter, r *http.Request) {
 	requestData := new(userModel.GroupJoinRequest)
 	req := new(userModel.GroupJoin)
@@ -116,7 +116,7 @@ func GroupJoin(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, req)
 }
 
-// GroupTransfer 用户组转移，请求数据格式：
+// GroupTransfer 用户组转移，请求数据格式：{"unique_id":"3","group_id":"1","to_unique_id":"2"}
 func GroupTransfer(w http.ResponseWriter, r *http.Request) {
 	requestData := new(userModel.GroupTransferRequest)
 	req := new(userModel.GroupTransfer)

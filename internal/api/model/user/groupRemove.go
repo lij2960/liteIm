@@ -44,6 +44,12 @@ func (g *GroupRemove) Deal(requestData *GroupRemoveRequest) *GroupRemove {
 		g.Msg = "用户组不存在"
 		return g
 	}
+	// 验证用户是否有权限
+	if !utils.CheckInStringSlice(userInfo.ManageGroupIds, requestData.GroupId) {
+		g.Code = common.RequestStatusError
+		g.Msg = "该用户不是此用户组的管理员"
+		return g
+	}
 	// 读取用户组下的所有用户
 	groupUsers, err := groupSer.GetAllUsers(requestData.GroupId)
 	if err != nil {
