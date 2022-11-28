@@ -7,7 +7,10 @@
 
 package utils
 
-import "time"
+import (
+	"math/rand"
+	"time"
+)
 
 // GetNowDateTime 获取当前时间字符串
 // 格式：2006-01-02 15:04:05
@@ -38,4 +41,10 @@ func CheckInStringSlice(a []string, elem string) bool {
 		}
 	}
 	return false
+}
+
+// GetRange 获取随机数
+func GetRange(num int) int {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(num)
 }

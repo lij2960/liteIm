@@ -14,7 +14,7 @@ import (
 	"net/http"
 )
 
-// PushMsg param: {"message_type":3,"to_unique_ids":["1"],"from_unique_id":"","data":"test"}
+// PushMsg param: {"message_type":3,"to_unique_ids":["1"],"from_unique_id":"","group_id":"1","data":"test"}
 func PushMsg(w http.ResponseWriter, r *http.Request) {
 	requestData := new(pushMsgModel.PushMsgRequest)
 	req := new(pushMsgModel.PushMsg)

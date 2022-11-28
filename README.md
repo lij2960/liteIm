@@ -33,6 +33,7 @@
     "message_type":3,
     "to_unique_ids":["1"],
     "from_unique_id":"2",
+    "group_id":"1",
     "data":"test"
    }
    

@@ -19,6 +19,7 @@ import (
 	"liteIm/pkg/logs"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -67,11 +68,21 @@ func RunWS(w http.ResponseWriter, r *http.Request) {
 	res := new(msgDeal.Receipt).Get(common.RequestStatusOk, "", imCommon.MessageTypeReceipt)
 	rr, _ := json.Marshal(res)
 	_ = pushMsg(client, rr)
+	// 处理离线消息
+	msgs := new(msgDeal.Offline).Get(uniqueId)
+	if len(msgs) > 0 {
+		for _, val := range msgs {
+			PushToUser(uniqueId, []byte(val))
+		}
+	}
 	readMsg(uniqueId, client)
 }
 
 // 指定客户端的链接下发消息
 func pushMsg(client *Client, data []byte) (err error) {
+	if client.lock == nil {
+		client.lock = new(sync.Mutex)
+	}
 	client.lock.Lock()
 	defer client.lock.Unlock()
 	writeWait, _ := config.Config.Section("").Key("imWriteWait").Int()
@@ -113,40 +124,36 @@ func readMsg(uniqueId string, client *Client) {
 		}
 		res := new(MsgDeal).Deal(msg)
 		resData, _ := json.Marshal(res)
-		err = PushToUser(uniqueId, resData)
-		if err != nil {
-			delConnClients(uniqueId, client)
-		}
+		PushToUser(uniqueId, resData)
 	}
 }
 
 // PushToUser 给单用户推送消息
-func PushToUser(uniqueId string, data []byte) (err error) {
+func PushToUser(uniqueId string, data []byte) {
 	logs.Info("-----", uniqueId)
+	if connLock == nil {
+		connLock = new(sync.RWMutex)
+	}
 	connLock.RLock()
 	defer connLock.RUnlock()
 	if client, exist := connClients[uniqueId]; !exist {
-		err = fmt.Errorf("im-getClientConn conn is not exist")
-		logs.Error(err, uniqueId)
-		return err
+		info := fmt.Errorf("im-getClientConn conn is not exist")
+		logs.Info(info, uniqueId)
+		// 设置离线消息
+		new(msgDeal.Offline).Set(uniqueId, string(data))
 	} else {
-		return pushMsg(client, data)
+		_ = pushMsg(client, data)
 	}
 }
 
-// PushToAll 给所有在线人员推送消息
+// PushToAll 给所有人员推送消息
 func PushToAll(data string) {
-	connLock.Lock()
-	defer connLock.Unlock()
-	for uniqueId, client := range connClients {
-		go func(val *Client, data string, uniqueId string) {
-			data = strings.Replace(data, imCommon.ReplaceVariable, uniqueId, -1)
-			err := pushMsg(val, []byte(data))
-			if err != nil {
-				new(Client).del(val)
-				logs.Info("disconnect client:", uniqueId)
-				delete(connClients, uniqueId)
-			}
-		}(client, data, uniqueId)
+	userIds, err := new(userService.UserList).GetAll()
+	if err != nil {
+		return
+	}
+	for _, uniqueId := range userIds {
+		data = strings.Replace(data, imCommon.ReplaceVariable, uniqueId, -1)
+		go PushToUser(uniqueId, []byte(data))
 	}
 }
