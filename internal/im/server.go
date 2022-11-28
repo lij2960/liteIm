@@ -140,7 +140,7 @@ func PushToUser(uniqueId string, data []byte) {
 		info := fmt.Errorf("im-getClientConn conn is not exist")
 		logs.Info(info, uniqueId)
 		// 设置离线消息
-		go new(msgDeal.Offline).Set(uniqueId, string(data))
+		new(msgDeal.Offline).Set(uniqueId, string(data))
 	} else {
 		_ = pushMsg(client, data)
 	}
@@ -154,6 +154,6 @@ func PushToAll(data string) {
 	}
 	for _, uniqueId := range userIds {
 		data = strings.Replace(data, imCommon.ReplaceVariable, uniqueId, -1)
-		go PushToUser(uniqueId, []byte(data))
+		PushToUser(uniqueId, []byte(data))
 	}
 }
