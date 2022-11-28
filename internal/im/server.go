@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	userService "liteIm/internal/api/model/user/service"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/internal/im/msgDeal"
 	"liteIm/pkg/common"
@@ -38,6 +39,24 @@ func RunWS(w http.ResponseWriter, r *http.Request) {
 		err = fmt.Errorf("must param for user unique id")
 		logs.Error("RunWS", err)
 		res := new(msgDeal.Receipt).Get(common.RequestStatusError, err.Error(), imCommon.MessageTypeReceipt)
+		rr, _ := json.Marshal(res)
+		_ = pushMsg(client, rr)
+		_ = client.conn.Close()
+		client = nil
+		return
+	}
+	// 检查用户是否存在
+	exist, err := new(userService.UserList).Exist(uniqueId)
+	if err != nil {
+		res := new(msgDeal.Receipt).Get(common.RequestStatusError, "验证用户错误", imCommon.MessageTypeReceipt)
+		rr, _ := json.Marshal(res)
+		_ = pushMsg(client, rr)
+		_ = client.conn.Close()
+		client = nil
+		return
+	}
+	if !exist {
+		res := new(msgDeal.Receipt).Get(common.RequestStatusError, "用户不存在", imCommon.MessageTypeReceipt)
 		rr, _ := json.Marshal(res)
 		_ = pushMsg(client, rr)
 		_ = client.conn.Close()
