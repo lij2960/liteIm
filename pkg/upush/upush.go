@@ -27,12 +27,12 @@ var hostUmengPush = "http://msg.umeng.com"
 var postPath = "/api/send"
 
 // ===========Android的APP Key和 秘钥，不同程序会不同=============
-var appKeyAndroid = config.Config.Section(common.ConfigSectionMpush).Key("appKeyAndroid").String()
-var masterSecreptAndroid = config.Config.Section(common.ConfigSectionMpush).Key("masterSecreptAndroid").String()
+var appKeyAndroid = config.Config.Section(common.ConfigSectionUpush).Key("appKeyAndroid").String()
+var masterSecreptAndroid = config.Config.Section(common.ConfigSectionUpush).Key("masterSecreptAndroid").String()
 
 // ===========IOS的APP Key和 秘钥，不同程序会不同===========
-var appKeyIOS = config.Config.Section(common.ConfigSectionMpush).Key("appKeyIOS").String()
-var masterSecretIOS = config.Config.Section(common.ConfigSectionMpush).Key("masterSecretIOS").String()
+var appKeyIOS = config.Config.Section(common.ConfigSectionUpush).Key("appKeyIOS").String()
+var masterSecretIOS = config.Config.Section(common.ConfigSectionUpush).Key("masterSecretIOS").String()
 
 // 推送是否是生成模式
 var pushProductionMode = "false"
