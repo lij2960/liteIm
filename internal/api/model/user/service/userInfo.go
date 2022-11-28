@@ -14,9 +14,11 @@ import (
 )
 
 type UserInfo struct {
-	UserId         string   `json:"user_id"`
-	GroupIds       []string `json:"group_ids,omitempty"`
-	ManageGroupIds []string `json:"manage_group_ids,omitempty"`
+	UserId             string   `json:"user_id"`
+	GroupIds           []string `json:"group_ids,omitempty"`
+	ManageGroupIds     []string `json:"manage_group_ids,omitempty"`
+	AndroidDeviceToken string   `json:"android_device_token,omitempty"`
+	IosDeviceToken     string   `json:"ios_device_token,omitempty"`
 }
 
 // Set 设置用户信息

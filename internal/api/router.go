@@ -28,6 +28,7 @@ func (router *Router) Deal(w http.ResponseWriter, r *http.Request) {
 
 	// 用户操作
 	router.Post("/user/register", w, r, controller.Register)
+	router.Post("/user/edit", w, r, controller.Edit)
 	router.Post("/user/remove", w, r, controller.Remove)
 
 	// 用户组操作

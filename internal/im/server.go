@@ -140,7 +140,7 @@ func PushToUser(uniqueId string, data []byte) {
 		info := fmt.Errorf("im-getClientConn conn is not exist")
 		logs.Info(info, uniqueId)
 		// 设置离线消息
-		new(msgDeal.Offline).Set(uniqueId, string(data))
+		go new(msgDeal.Offline).Set(uniqueId, string(data))
 	} else {
 		_ = pushMsg(client, data)
 	}

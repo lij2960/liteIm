@@ -41,6 +41,32 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, req)
 }
 
+// Edit 用户编辑，请求数据格式：{"unique_id":"5","android_device_token":"android","ios_device_token":""}
+func Edit(w http.ResponseWriter, r *http.Request) {
+	requestData := new(userModel.EditRequest)
+	req := new(userModel.Edit)
+	body, err := getBody(r)
+	if err != nil {
+		req.Code = common.RequestStatusError
+		req.Msg = "Edit post data get error"
+	} else {
+		err = json.Unmarshal(body, &requestData)
+		if err != nil {
+			logs.Error("controller-Edit-Unmarshal", err)
+			req.Code = common.RequestStatusError
+			req.Msg = "post data parse error"
+		} else {
+			if requestData.UniqueId == "" {
+				req.Code = common.RequestStatusError
+				req.Msg = "unique id is null"
+			} else {
+				req = req.Deal(requestData)
+			}
+		}
+	}
+	writeJson(w, req)
+}
+
 // Remove 用户移除，请求数据格式：{"unique_id":"3"}
 func Remove(w http.ResponseWriter, r *http.Request) {
 	requestData := new(userModel.RemoveRequest)

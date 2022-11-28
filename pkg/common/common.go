@@ -16,6 +16,7 @@ type Response struct {
 // 配置模块定义
 const (
 	ConfigSectionRedisClient = "redis"
+	ConfigSectionMpush       = "mpush"
 )
 
 // 运行模式定义

@@ -8,8 +8,10 @@
 package msgDeal
 
 import (
+	userService "liteIm/internal/api/model/user/service"
 	imCommon "liteIm/internal/im/common"
 	msgDealService "liteIm/internal/im/msgDeal/service"
+	"liteIm/pkg/upush"
 )
 
 type Offline struct{}
@@ -19,6 +21,21 @@ func (o *Offline) Set(uniqueId, msg string) {
 	msgId := imCommon.GetMsgId(uniqueId)
 	_ = new(msgDealService.MsgList).Add(uniqueId, msgId)
 	_ = new(msgDealService.MsgDetail).Set(uniqueId, msgId, msg)
+	o.upush(uniqueId)
+}
+
+// 发送友盟离线消息
+func (o *Offline) upush(uniqueId string) {
+	userInfo, err := new(userService.UserInfo).Get(uniqueId)
+	if err != nil {
+		return
+	}
+	if userInfo.AndroidDeviceToken != "" {
+		upush.UPushAndroid("离线消息通知", userInfo.AndroidDeviceToken, nil)
+	}
+	if userInfo.IosDeviceToken != "" {
+		upush.UPushIOS("离线消息通知", userInfo.IosDeviceToken, 0, "")
+	}
 }
 
 func (o *Offline) Get(uniqueId string) (res []string) {
