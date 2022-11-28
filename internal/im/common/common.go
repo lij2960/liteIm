@@ -25,4 +25,5 @@ const (
 	MessageTypeImg       = 4 // 图片消息
 	MessageTypeVideo     = 5 // 视频消息
 	MessageTypeAudio     = 6 // 音频消息
+	MessageTypeSystem    = 7 // 系统消息（加入群，解散群，创建群等）
 )

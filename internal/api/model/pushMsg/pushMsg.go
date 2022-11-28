@@ -9,6 +9,7 @@ package pushMsgModel
 
 import (
 	"encoding/json"
+	userService "liteIm/internal/api/model/user/service"
 	"liteIm/internal/im"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
@@ -23,7 +24,8 @@ type PushMsg struct {
 type PushMsgRequest struct {
 	MessageType  int      `json:"message_type"`
 	ToUniqueIds  []string `json:"to_unique_ids"`  // 空数组表示推送给所有人
-	FromUniqueId string   `json:"from_unique_id"` // 空字符串表示为系统消息
+	FromUniqueId string   `json:"from_unique_id"` // 空字符串表示为系统通知（通过接口发送的系统通知）
+	GroupId      string   `json:"group_id"`       // 群ID 不为空，则为发送的群消息，群消息发送给群内的所有用户
 	Data         string   `json:"data"`
 }
 
@@ -52,16 +54,34 @@ func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
 			Time:         time.Now().Unix(),
 		},
 	}
-	if len(requestData.ToUniqueIds) == 0 { // 推送给所有人
-		pushData, _ := json.Marshal(push)
-		go im.PushToAll(string(pushData))
-	} else { // 推送给指定人员
-		for _, val := range requestData.ToUniqueIds {
+	// 判断是否发送的群消息
+	if requestData.GroupId != "" {
+		// 读取群包含的用户ID
+		uniqueIds, err := new(userService.Group).GetAllUsers(requestData.GroupId)
+		if err != nil {
+			p.Code = common.RequestStatusError
+			p.Msg = "读取群信息失败"
+			return p
+		}
+		for _, val := range uniqueIds {
 			go func(val string, push *PushData) {
 				push.Data.ToUniqueId = val
 				pushData, _ := json.Marshal(push)
 				_ = im.PushToUser(val, pushData)
 			}(val, push)
+		}
+	} else {
+		if len(requestData.ToUniqueIds) == 0 { // 推送给所有人
+			pushData, _ := json.Marshal(push)
+			go im.PushToAll(string(pushData))
+		} else { // 推送给指定人员
+			for _, val := range requestData.ToUniqueIds {
+				go func(val string, push *PushData) {
+					push.Data.ToUniqueId = val
+					pushData, _ := json.Marshal(push)
+					_ = im.PushToUser(val, pushData)
+				}(val, push)
+			}
 		}
 	}
 	return p
