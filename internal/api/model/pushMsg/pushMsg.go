@@ -36,7 +36,8 @@ type PushData struct {
 
 type PushDataDetail struct {
 	ToUniqueId   string `json:"to_unique_id"`
-	FromUniqueId string `json:"from_unique_id"`
+	FromUniqueId string `json:"from_unique_id"` // 消息来源用户
+	FromGroupId  string `json:"from_group_id"`  // 消息来源用户组
 	Message      string `json:"message"`
 	Time         int64  `json:"time"`
 }
@@ -50,6 +51,7 @@ func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
 		Data: &PushDataDetail{
 			ToUniqueId:   imCommon.ReplaceVariable,
 			FromUniqueId: requestData.FromUniqueId,
+			FromGroupId:  requestData.GroupId,
 			Message:      requestData.Data,
 			Time:         time.Now().Unix(),
 		},

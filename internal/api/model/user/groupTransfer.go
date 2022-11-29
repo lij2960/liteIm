@@ -8,7 +8,10 @@
 package userModel
 
 import (
+	"encoding/json"
 	userService "liteIm/internal/api/model/user/service"
+	"liteIm/internal/im"
+	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
 	"liteIm/pkg/logs"
 	"liteIm/pkg/utils"
@@ -96,5 +99,36 @@ func (g *GroupTransfer) Deal(requestData *GroupTransferRequest) *GroupTransfer {
 		g.Msg = "用户组权限转移失败"
 		return g
 	}
+	// 用户组权限转移通知
+	go g.notice(requestData, userInfo, transferUserInfo)
 	return g
+}
+
+func (g *GroupTransfer) notice(requestData *GroupTransferRequest, userInfo *userService.UserInfo, transferUserInfo *userService.UserInfo) {
+	// 读取组的所有用户
+	ids, err := new(userService.Group).GetAllUsers(requestData.GroupId)
+	if err != nil {
+		return
+	}
+	// 拼装系统消息
+	data := &imCommon.OperateInfo{
+		DataCommon: imCommon.DataCommon{
+			MessageType: imCommon.MessageTypeSystem,
+		},
+		Data: imCommon.OperateInfoData{
+			Type: imCommon.OperateInfoType,
+			Group: imCommon.OperateInfoGroup{
+				GroupId:    requestData.GroupId,
+				UniqueId:   userInfo.UserId,
+				Nickname:   userInfo.Nickname,
+				ToUniqueId: transferUserInfo.UserId,
+				ToNickname: transferUserInfo.Nickname,
+				Status:     imCommon.OperateInfoGroupTransfer,
+			},
+		},
+	}
+	dataByte, _ := json.Marshal(data)
+	for _, val := range ids {
+		im.PushToUser(val, dataByte)
+	}
 }

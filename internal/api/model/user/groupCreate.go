@@ -8,7 +8,10 @@
 package userModel
 
 import (
+	"encoding/json"
 	userService "liteIm/internal/api/model/user/service"
+	"liteIm/internal/im"
+	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
 )
 
@@ -64,5 +67,27 @@ func (g *GroupCreate) Deal(requestData *GroupCreateRequest) *GroupCreate {
 		g.Msg = "用户组管理员失败"
 		return g
 	}
+	// 创建用户组通知
+	go g.notice(requestData, userInfo)
 	return g
+}
+
+func (g *GroupCreate) notice(requestData *GroupCreateRequest, userInfo *userService.UserInfo) {
+	// 拼装系统消息
+	data := &imCommon.OperateInfo{
+		DataCommon: imCommon.DataCommon{
+			MessageType: imCommon.MessageTypeSystem,
+		},
+		Data: imCommon.OperateInfoData{
+			Type: imCommon.OperateInfoType,
+			Group: imCommon.OperateInfoGroup{
+				GroupId:  requestData.GroupId,
+				UniqueId: userInfo.UserId,
+				Nickname: userInfo.Nickname,
+				Status:   imCommon.OperateInfoGroupCreate,
+			},
+		},
+	}
+	dataByte, _ := json.Marshal(data)
+	im.PushToUser(requestData.UniqueId, dataByte)
 }

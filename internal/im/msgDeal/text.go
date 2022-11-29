@@ -16,8 +16,9 @@ import (
 )
 
 type Text struct {
-	ToUniqueId   string `json:"to_unique_id"`
-	FromUniqueId string `json:"from_unique_id"`
+	ToUniqueId   string `json:"to_unique_id"`   // 消息发送至用户ID
+	FromUniqueId string `json:"from_unique_id"` // 消息来源用户
+	FromGroupId  string `json:"from_group_id"`  // 消息来源用户组
 	Message      string `json:"message"`
 	Time         int64  `json:"time"`
 }

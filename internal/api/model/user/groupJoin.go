@@ -8,7 +8,10 @@
 package userModel
 
 import (
+	"encoding/json"
 	userService "liteIm/internal/api/model/user/service"
+	"liteIm/internal/im"
+	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
 	"liteIm/pkg/utils"
 )
@@ -64,5 +67,34 @@ func (g *GroupJoin) Deal(requestData *GroupJoinRequest) *GroupJoin {
 		g.Msg = "用户组添加失败"
 		return g
 	}
+	// 加入用户组通知
+	go g.notice(requestData, userInfo)
 	return g
+}
+
+func (g *GroupJoin) notice(requestData *GroupJoinRequest, userInfo *userService.UserInfo) {
+	// 读取组的所有用户
+	ids, err := new(userService.Group).GetAllUsers(requestData.GroupId)
+	if err != nil {
+		return
+	}
+	// 拼装系统消息
+	data := &imCommon.OperateInfo{
+		DataCommon: imCommon.DataCommon{
+			MessageType: imCommon.MessageTypeSystem,
+		},
+		Data: imCommon.OperateInfoData{
+			Type: imCommon.OperateInfoType,
+			Group: imCommon.OperateInfoGroup{
+				GroupId:  requestData.GroupId,
+				UniqueId: userInfo.UserId,
+				Nickname: userInfo.Nickname,
+				Status:   imCommon.OperateInfoGroupJoin,
+			},
+		},
+	}
+	dataByte, _ := json.Marshal(data)
+	for _, val := range ids {
+		im.PushToUser(val, dataByte)
+	}
 }

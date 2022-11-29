@@ -8,7 +8,10 @@
 package userModel
 
 import (
+	"encoding/json"
 	userService "liteIm/internal/api/model/user/service"
+	"liteIm/internal/im"
+	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
 	"liteIm/pkg/utils"
 )
@@ -79,5 +82,34 @@ func (g *GroupRemove) Deal(requestData *GroupRemoveRequest) *GroupRemove {
 	_ = new(userService.Group).Del(requestData.GroupId)
 	// 删除用户组管理
 	_ = new(userService.GroupManage).Del(requestData.GroupId)
+	// 删除用户组通知
+	go g.notice(requestData, userInfo)
 	return g
+}
+
+func (g *GroupRemove) notice(requestData *GroupRemoveRequest, userInfo *userService.UserInfo) {
+	// 读取组的所有用户
+	ids, err := new(userService.Group).GetAllUsers(requestData.GroupId)
+	if err != nil {
+		return
+	}
+	// 拼装系统消息
+	data := &imCommon.OperateInfo{
+		DataCommon: imCommon.DataCommon{
+			MessageType: imCommon.MessageTypeSystem,
+		},
+		Data: imCommon.OperateInfoData{
+			Type: imCommon.OperateInfoType,
+			Group: imCommon.OperateInfoGroup{
+				GroupId:  requestData.GroupId,
+				UniqueId: userInfo.UserId,
+				Nickname: userInfo.Nickname,
+				Status:   imCommon.OperateInfoGroupRemove,
+			},
+		},
+	}
+	dataByte, _ := json.Marshal(data)
+	for _, val := range ids {
+		im.PushToUser(val, dataByte)
+	}
 }

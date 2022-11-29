@@ -18,6 +18,7 @@ type Register struct {
 
 type RegisterRequest struct {
 	UniqueId string `json:"unique_id"`
+	Nickname string `json:"nickname"`
 }
 
 func (r *Register) Deal(requestData *RegisterRequest) *Register {
@@ -43,6 +44,7 @@ func (r *Register) Deal(requestData *RegisterRequest) *Register {
 	// 添加用户详情
 	userInfo := &userService.UserInfo{
 		UserId:         requestData.UniqueId,
+		Nickname:       requestData.Nickname,
 		GroupIds:       nil,
 		ManageGroupIds: nil,
 	}

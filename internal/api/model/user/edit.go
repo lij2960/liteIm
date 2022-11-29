@@ -18,6 +18,7 @@ type Edit struct {
 
 type EditRequest struct {
 	UniqueId           string `json:"unique_id"`
+	Nickname           string `json:"nickname,omitempty"`
 	AndroidDeviceToken string `json:"android_device_token,omitempty"`
 	IosDeviceToken     string `json:"ios_device_token,omitempty"`
 }
@@ -48,6 +49,9 @@ func (e *Edit) Deal(requestData *EditRequest) *Edit {
 	}
 	if requestData.IosDeviceToken != "" {
 		userInfo.IosDeviceToken = requestData.IosDeviceToken
+	}
+	if requestData.Nickname != "" {
+		userInfo.Nickname = requestData.Nickname
 	}
 	err = userInfo.Set()
 	if err != nil {
