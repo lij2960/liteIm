@@ -9,11 +9,12 @@ package pushMsgModel
 
 import (
 	"encoding/json"
+	"liteIm/internal/api/model"
 	userService "liteIm/internal/api/model/user/service"
-	"liteIm/internal/im"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
 	"liteIm/pkg/logs"
+	"strings"
 	"time"
 )
 
@@ -70,13 +71,13 @@ func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
 				push.Data.ToUniqueId = val
 				pushData, _ := json.Marshal(push)
 				//im.PushToUser(val, pushData)
-				im.MsgDispatcher(val, pushData)
+				model.MsgDispatcher(val, pushData)
 			}(val, push)
 		}
 	} else {
 		if len(requestData.ToUniqueIds) == 0 { // 推送给所有人
 			pushData, _ := json.Marshal(push)
-			go im.PushToAll(string(pushData))
+			go p.PushToAll(string(pushData))
 		} else { // 推送给指定人员
 			for _, val := range requestData.ToUniqueIds {
 				go func(val string, push *PushData) {
@@ -84,10 +85,23 @@ func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
 					pushData, _ := json.Marshal(push)
 					//im.PushToUser(val, pushData)
 					logs.Info("------------")
-					im.MsgDispatcher(val, pushData)
+					model.MsgDispatcher(val, pushData)
 				}(val, push)
 			}
 		}
 	}
 	return p
+}
+
+// PushToAll 给所有人员推送消息
+func (p *PushMsg) PushToAll(data string) {
+	userIds, err := new(userService.UserList).GetAll()
+	if err != nil {
+		return
+	}
+	for _, uniqueId := range userIds {
+		data = strings.Replace(data, imCommon.ReplaceVariable, uniqueId, -1)
+		//PushToUser(uniqueId, []byte(data))
+		model.MsgDispatcher(uniqueId, []byte(data))
+	}
 }

@@ -5,7 +5,7 @@
  * Version:    V1.0.0
  **********************************************************/
 
-package im
+package model
 
 import (
 	"github.com/gorilla/websocket"

@@ -9,8 +9,8 @@ package userModel
 
 import (
 	"encoding/json"
+	"liteIm/internal/api/model"
 	userService "liteIm/internal/api/model/user/service"
-	"liteIm/internal/im"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
 	"liteIm/pkg/logs"
@@ -130,6 +130,6 @@ func (g *GroupTransfer) notice(requestData *GroupTransferRequest, userInfo *user
 	dataByte, _ := json.Marshal(data)
 	for _, val := range ids {
 		//im.PushToUser(val, dataByte)
-		im.MsgDispatcher(val, dataByte)
+		model.MsgDispatcher(val, dataByte)
 	}
 }

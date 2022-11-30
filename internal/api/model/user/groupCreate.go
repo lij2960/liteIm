@@ -9,8 +9,8 @@ package userModel
 
 import (
 	"encoding/json"
+	"liteIm/internal/api/model"
 	userService "liteIm/internal/api/model/user/service"
-	"liteIm/internal/im"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
 )
@@ -90,5 +90,5 @@ func (g *GroupCreate) notice(requestData *GroupCreateRequest, userInfo *userServ
 	}
 	dataByte, _ := json.Marshal(data)
 	//im.PushToUser(requestData.UniqueId, dataByte)
-	im.MsgDispatcher(requestData.UniqueId, dataByte)
+	model.MsgDispatcher(requestData.UniqueId, dataByte)
 }

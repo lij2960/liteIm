@@ -18,7 +18,6 @@ import (
 	"liteIm/pkg/config"
 	"liteIm/pkg/logs"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 )
@@ -145,18 +144,5 @@ func PushToUser(uniqueId string, data []byte) {
 	} else {
 		logs.Info("push msg to", uniqueId, string(data))
 		_ = pushMsg(client, data)
-	}
-}
-
-// PushToAll 给所有人员推送消息
-func PushToAll(data string) {
-	userIds, err := new(userService.UserList).GetAll()
-	if err != nil {
-		return
-	}
-	for _, uniqueId := range userIds {
-		data = strings.Replace(data, imCommon.ReplaceVariable, uniqueId, -1)
-		//PushToUser(uniqueId, []byte(data))
-		MsgDispatcher(uniqueId, []byte(data))
 	}
 }
