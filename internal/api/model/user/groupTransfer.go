@@ -129,6 +129,7 @@ func (g *GroupTransfer) notice(requestData *GroupTransferRequest, userInfo *user
 	}
 	dataByte, _ := json.Marshal(data)
 	for _, val := range ids {
-		im.PushToUser(val, dataByte)
+		//im.PushToUser(val, dataByte)
+		im.MsgDispatcher(val, dataByte)
 	}
 }

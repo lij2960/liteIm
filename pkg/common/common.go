@@ -17,6 +17,8 @@ type Response struct {
 const (
 	ConfigSectionRedisClient = "redis"
 	ConfigSectionUpush       = "upush"
+	ConfigSectionEtcd        = "etcd"
+	ConfigSectionRPC         = "rpc"
 )
 
 // 运行模式定义
@@ -28,6 +30,12 @@ const (
 
 // 请求错误定义
 const (
-	RequestStatusOk    = 0
-	RequestStatusError = 1
+	RequestStatusOk          = 0
+	RequestStatusError       = 1
+	RequestStatusUserOffline = 2
+)
+
+// 定义IM 不需要校验的用户
+const (
+	ImNoCheckUserForDispatcher = "im-msgDispatcher"
 )

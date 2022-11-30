@@ -47,32 +47,34 @@ func RunWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 检查用户是否存在
-	exist, err := new(userService.UserList).Exist(uniqueId)
-	if err != nil {
-		res := new(msgDeal.Receipt).Get(common.RequestStatusError, "验证用户错误", imCommon.MessageTypeReceipt)
+	if uniqueId != common.ImNoCheckUserForDispatcher {
+		exist, err := new(userService.UserList).Exist(uniqueId)
+		if err != nil {
+			res := new(msgDeal.Receipt).Get(common.RequestStatusError, "验证用户错误", imCommon.MessageTypeReceipt)
+			rr, _ := json.Marshal(res)
+			_ = pushMsg(client, rr)
+			_ = client.conn.Close()
+			client = nil
+			return
+		}
+		if !exist {
+			res := new(msgDeal.Receipt).Get(common.RequestStatusError, "用户不存在", imCommon.MessageTypeReceipt)
+			rr, _ := json.Marshal(res)
+			_ = pushMsg(client, rr)
+			_ = client.conn.Close()
+			client = nil
+			return
+		}
+		addConnClients(uniqueId, client)
+		res := new(msgDeal.Receipt).Get(common.RequestStatusOk, "", imCommon.MessageTypeReceipt)
 		rr, _ := json.Marshal(res)
 		_ = pushMsg(client, rr)
-		_ = client.conn.Close()
-		client = nil
-		return
-	}
-	if !exist {
-		res := new(msgDeal.Receipt).Get(common.RequestStatusError, "用户不存在", imCommon.MessageTypeReceipt)
-		rr, _ := json.Marshal(res)
-		_ = pushMsg(client, rr)
-		_ = client.conn.Close()
-		client = nil
-		return
-	}
-	addConnClients(uniqueId, client)
-	res := new(msgDeal.Receipt).Get(common.RequestStatusOk, "", imCommon.MessageTypeReceipt)
-	rr, _ := json.Marshal(res)
-	_ = pushMsg(client, rr)
-	// 处理离线消息
-	msgs := new(msgDeal.Offline).Get(uniqueId)
-	if len(msgs) > 0 {
-		for _, val := range msgs {
-			PushToUser(uniqueId, []byte(val))
+		// 处理离线消息
+		msgs := new(msgDeal.Offline).Get(uniqueId)
+		if len(msgs) > 0 {
+			for _, val := range msgs {
+				PushToUser(uniqueId, []byte(val))
+			}
 		}
 	}
 	readMsg(uniqueId, client)
@@ -123,25 +125,25 @@ func readMsg(uniqueId string, client *Client) {
 			return
 		}
 		res := new(MsgDeal).Deal(msg)
-		resData, _ := json.Marshal(res)
-		PushToUser(uniqueId, resData)
+		if uniqueId != common.ImNoCheckUserForDispatcher {
+			resData, _ := json.Marshal(res)
+			PushToUser(uniqueId, resData)
+		}
 	}
 }
 
 // PushToUser 给单用户推送消息
 func PushToUser(uniqueId string, data []byte) {
 	logs.Info("-----", uniqueId)
-	if connLock == nil {
-		connLock = new(sync.RWMutex)
-	}
 	connLock.RLock()
 	defer connLock.RUnlock()
 	if client, exist := connClients[uniqueId]; !exist {
 		info := fmt.Errorf("im-getClientConn conn is not exist")
 		logs.Info(info, uniqueId)
 		// 设置离线消息
-		new(msgDeal.Offline).Set(uniqueId, string(data))
+		//new(msgDeal.Offline).Set(uniqueId, string(data))
 	} else {
+		logs.Info("push msg to", uniqueId, string(data))
 		_ = pushMsg(client, data)
 	}
 }
@@ -154,6 +156,7 @@ func PushToAll(data string) {
 	}
 	for _, uniqueId := range userIds {
 		data = strings.Replace(data, imCommon.ReplaceVariable, uniqueId, -1)
-		PushToUser(uniqueId, []byte(data))
+		//PushToUser(uniqueId, []byte(data))
+		MsgDispatcher(uniqueId, []byte(data))
 	}
 }

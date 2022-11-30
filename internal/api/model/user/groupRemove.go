@@ -110,6 +110,7 @@ func (g *GroupRemove) notice(requestData *GroupRemoveRequest, userInfo *userServ
 	}
 	dataByte, _ := json.Marshal(data)
 	for _, val := range ids {
-		im.PushToUser(val, dataByte)
+		//im.PushToUser(val, dataByte)
+		im.MsgDispatcher(val, dataByte)
 	}
 }

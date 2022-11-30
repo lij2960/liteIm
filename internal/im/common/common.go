@@ -39,6 +39,12 @@ type OperateInfoGroup struct {
 	Status     int    `json:"status"`
 }
 
+// 定义im服务提供的地址key
+var (
+	ImServiceKeyPre = "lim:im:push:service"
+	ImServiceKey    = fmt.Sprintf("%s:%s", ImServiceKeyPre, utils.GetHostName())
+)
+
 // 操作通知类型定义
 const (
 	OperateInfoType = 1 // 群操作

@@ -17,3 +17,10 @@ appKeyAndroid = ""
 masterSecreptAndroid = ""
 appKeyIOS = ""
 masterSecretIOS = ""
+
+[etcd]
+# 多个用英文","隔开
+endpoints = 127.0.0.1:2379
+
+[rpc]
+port = 8972

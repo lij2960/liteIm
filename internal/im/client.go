@@ -9,6 +9,7 @@ package im
 
 import (
 	"github.com/gorilla/websocket"
+	imService "liteIm/internal/im/service"
 	"liteIm/pkg/logs"
 	"sync"
 )
@@ -28,14 +29,17 @@ type Client struct {
 	lock *sync.Mutex
 }
 
+func init() {
+	connLock = new(sync.RWMutex)
+}
+
 // 增加用户链接
 func addConnClients(uniqueID string, client *Client) {
-	if connLock == nil {
-		connLock = new(sync.RWMutex)
-	}
 	connLock.RLock()
 	defer connLock.RUnlock()
 	connClients[uniqueID] = client
+	logs.Info("addConnClients", uniqueID)
+	_ = new(imService.OnlineUser).Add(uniqueID)
 }
 
 // 删除用户链接
@@ -44,6 +48,7 @@ func delConnClients(uniqueID string, client *Client) {
 	defer connLock.RUnlock()
 	new(Client).del(client)
 	logs.Info("disconnect client:", uniqueID)
+	_ = new(imService.OnlineUser).Del(uniqueID)
 	delete(connClients, uniqueID)
 }
 

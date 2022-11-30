@@ -89,5 +89,6 @@ func (g *GroupCreate) notice(requestData *GroupCreateRequest, userInfo *userServ
 		},
 	}
 	dataByte, _ := json.Marshal(data)
-	im.PushToUser(requestData.UniqueId, dataByte)
+	//im.PushToUser(requestData.UniqueId, dataByte)
+	im.MsgDispatcher(requestData.UniqueId, dataByte)
 }

@@ -69,7 +69,8 @@ func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
 			go func(val string, push *PushData) {
 				push.Data.ToUniqueId = val
 				pushData, _ := json.Marshal(push)
-				im.PushToUser(val, pushData)
+				//im.PushToUser(val, pushData)
+				im.MsgDispatcher(val, pushData)
 			}(val, push)
 		}
 	} else {
@@ -81,7 +82,9 @@ func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
 				go func(val string, push *PushData) {
 					push.Data.ToUniqueId = val
 					pushData, _ := json.Marshal(push)
-					im.PushToUser(val, pushData)
+					//im.PushToUser(val, pushData)
+					logs.Info("------------")
+					im.MsgDispatcher(val, pushData)
 				}(val, push)
 			}
 		}
