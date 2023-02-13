@@ -8,8 +8,8 @@
 package userService
 
 import (
+	"github.com/sirupsen/logrus"
 	"liteIm/pkg/common"
-	"liteIm/pkg/logs"
 )
 
 type GroupManage struct{}
@@ -19,7 +19,7 @@ func (g *GroupManage) Set(groupId, userId string) error {
 	key := getUserGroupManageKey(groupId)
 	_, err := common.RedisClient.Set(key, userId, -1).Result()
 	if err != nil {
-		logs.Error("GroupManage-Set", err)
+		logrus.Error("GroupManage-Set", err)
 	}
 	return err
 }
@@ -29,7 +29,7 @@ func (g *GroupManage) Del(groupId string) error {
 	key := getUserGroupManageKey(groupId)
 	_, err := common.RedisClient.Del(key).Result()
 	if err != nil {
-		logs.Error("GroupManage-Del", err)
+		logrus.Error("GroupManage-Del", err)
 	}
 	return err
 }

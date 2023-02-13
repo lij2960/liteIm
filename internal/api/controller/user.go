@@ -9,9 +9,9 @@ package controller
 
 import (
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	userModel "liteIm/internal/api/model/user"
 	"liteIm/pkg/common"
-	"liteIm/pkg/logs"
 	"net/http"
 )
 
@@ -26,7 +26,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	} else {
 		err = json.Unmarshal(body, &requestData)
 		if err != nil {
-			logs.Error("controller-Register-Unmarshal", err)
+			logrus.Error("controller-Register-Unmarshal", err)
 			req.Code = common.RequestStatusError
 			req.Msg = "post data parse error"
 		} else {
@@ -52,7 +52,7 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 	} else {
 		err = json.Unmarshal(body, &requestData)
 		if err != nil {
-			logs.Error("controller-Edit-Unmarshal", err)
+			logrus.Error("controller-Edit-Unmarshal", err)
 			req.Code = common.RequestStatusError
 			req.Msg = "post data parse error"
 		} else {

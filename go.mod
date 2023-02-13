@@ -56,6 +56,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/rubyist/circuitbreaker v2.2.1+incompatible // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/smallnest/quick v0.0.0-20220703133648-f13409fa6c67 // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/stretchr/testify v1.8.1 // indirect

@@ -9,6 +9,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
 	"liteIm/pkg/utils"
 	"os"
@@ -52,6 +53,23 @@ func configInit() {
 		return
 	}
 
-	// 设置gin的运行模式
+	// 设置日志的运行模式
+	logMode()
 	fmt.Println(utils.GetNowDateTime(), "env", Env)
+}
+
+func logMode() {
+	logrus.SetReportCaller(true)
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceQuote:      true,                  //键值对加引号
+		TimestampFormat: "2006-01-02 15:04:05", //时间格式
+		FullTimestamp:   true,
+	})
+	if Env == "test" {
+		logrus.SetLevel(logrus.DebugLevel)
+	} else if Env == "prod" {
+		logrus.SetLevel(logrus.InfoLevel)
+	} else {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
 }

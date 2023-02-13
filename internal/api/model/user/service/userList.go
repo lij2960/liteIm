@@ -8,8 +8,8 @@
 package userService
 
 import (
+	"github.com/sirupsen/logrus"
 	"liteIm/pkg/common"
-	"liteIm/pkg/logs"
 )
 
 type UserList struct{}
@@ -19,7 +19,7 @@ func (u *UserList) Add(uniqueId string) error {
 	key := getUserListKey()
 	_, err := common.RedisClient.SAdd(key, uniqueId).Result()
 	if err != nil {
-		logs.Error("UserList-Add", err)
+		logrus.Error("UserList-Add", err)
 	}
 	return err
 }
@@ -29,7 +29,7 @@ func (u *UserList) Del(uniqueId string) error {
 	key := getUserListKey()
 	_, err := common.RedisClient.SRem(key, uniqueId).Result()
 	if err != nil {
-		logs.Error("UserList-Del", err)
+		logrus.Error("UserList-Del", err)
 	}
 	return err
 }
@@ -39,7 +39,7 @@ func (u *UserList) Exist(uniqueId string) (res bool, err error) {
 	key := getUserListKey()
 	res, err = common.RedisClient.SIsMember(key, uniqueId).Result()
 	if err != nil {
-		logs.Error("UserList-Exist", err)
+		logrus.Error("UserList-Exist", err)
 	}
 	return res, err
 }
@@ -49,7 +49,7 @@ func (u *UserList) GetAll() (res []string, err error) {
 	key := getUserListKey()
 	res, err = common.RedisClient.SMembers(key).Result()
 	if err != nil {
-		logs.Error("UserList-GetAll", err)
+		logrus.Error("UserList-GetAll", err)
 		return nil, err
 	}
 	return res, nil

@@ -9,11 +9,11 @@ package userModel
 
 import (
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"liteIm/internal/api/model"
 	userService "liteIm/internal/api/model/user/service"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
-	"liteIm/pkg/logs"
 	"liteIm/pkg/utils"
 )
 
@@ -79,7 +79,7 @@ func (g *GroupTransfer) Deal(requestData *GroupTransferRequest) *GroupTransfer {
 	} else {
 		userInfo.ManageGroupIds = utils.DeleteSliceString(userInfo.ManageGroupIds, requestData.GroupId)
 	}
-	logs.Info("----", *userInfo)
+	logrus.Debug("----", *userInfo)
 	err = userInfo.Set()
 	if err != nil {
 		g.Code = common.RequestStatusError

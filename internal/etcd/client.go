@@ -9,10 +9,10 @@ package etcd
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"liteIm/pkg/common"
 	"liteIm/pkg/config"
-	"liteIm/pkg/logs"
 	"time"
 )
 
@@ -32,7 +32,7 @@ func init() {
 		DialTimeout: timeout,
 	})
 	if err != nil {
-		logs.Error("etcd-cli-init", err)
+		logrus.Error("etcd-cli-init", err)
 	}
 }
 
@@ -40,16 +40,16 @@ func init() {
 func keepalive(lease clientv3.Lease, leaseID clientv3.LeaseID) {
 	keepRespChan, err := lease.KeepAlive(context.TODO(), leaseID)
 	if err != nil {
-		logs.Error("etcd-keepalive", err)
+		logrus.Error("etcd-keepalive", err)
 		return
 	}
 	for {
 		select {
 		case keepResp := <-keepRespChan:
 			if keepRespChan == nil {
-				logs.Error("etcd-keepalive-nil", leaseID)
+				logrus.Error("etcd-keepalive-nil", leaseID)
 			} else {
-				logs.Info("etcd-keepalive-success", keepResp.ID)
+				logrus.Debug("etcd-keepalive-success", keepResp.ID)
 			}
 		}
 	}
@@ -59,18 +59,18 @@ func keepalive(lease clientv3.Lease, leaseID clientv3.LeaseID) {
 func resp(key string, value string, leaseID clientv3.LeaseID) {
 	kv := clientv3.NewKV(client)
 	if _, err := kv.Put(context.TODO(), key, value, clientv3.WithLease(leaseID)); err != nil {
-		logs.Error("etcd-resp-Put", err)
+		logrus.Error("etcd-resp-Put", err)
 		return
 	}
 	for {
 		getResp, err := kv.Get(context.TODO(), key)
 		if err != nil {
-			logs.Error("etcd-resp-Get", err)
+			logrus.Error("etcd-resp-Get", err)
 			return
 		}
 		if getResp.Count == 0 {
 			if _, err = kv.Put(context.TODO(), key, value, clientv3.WithLease(leaseID)); err != nil {
-				logs.Error("etcd-resp-Put", err)
+				logrus.Error("etcd-resp-Put", err)
 				return
 			}
 		}

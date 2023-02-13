@@ -9,8 +9,8 @@ package controller
 
 import (
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"io"
-	"liteIm/pkg/logs"
 	"net/http"
 )
 
@@ -18,9 +18,9 @@ func getBody(r *http.Request) (res []byte, err error) {
 	length := r.ContentLength
 	body := make([]byte, length)
 	_, err = r.Body.Read(body)
-	logs.Info("getBody:", string(body))
+	logrus.Debug("getBody:", string(body))
 	if err != nil && err != io.EOF {
-		logs.Error("getBody", err)
+		logrus.Error("getBody", err)
 		return nil, err
 	}
 	return body, nil

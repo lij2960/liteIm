@@ -10,8 +10,8 @@ package msgDeal
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	imCommon "liteIm/internal/im/common"
-	"liteIm/pkg/logs"
 	"time"
 )
 
@@ -31,7 +31,7 @@ func (t *Text) Deal(data any) (res *TextResponse, uniqueId string, err error) {
 	dataJson, _ := json.Marshal(data)
 	err = json.Unmarshal(dataJson, &t)
 	if err != nil {
-		logs.Error("msgDeal-Text", err)
+		logrus.Error("msgDeal-Text", err)
 		return nil, "", fmt.Errorf("data parse err")
 	}
 	t.Time = time.Now().Unix()

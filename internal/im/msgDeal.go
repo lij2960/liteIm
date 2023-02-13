@@ -10,10 +10,10 @@ package im
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/internal/im/msgDeal"
 	"liteIm/pkg/common"
-	"liteIm/pkg/logs"
 )
 
 type MsgDeal struct{}
@@ -23,7 +23,7 @@ func (m *MsgDeal) Deal(msg []byte) (res any) {
 	err := json.Unmarshal(msg, &data)
 	if err != nil {
 		err = fmt.Errorf("request data unmarshal error")
-		logs.Error("MsgDeal-Deal", err)
+		logrus.Error("MsgDeal-Deal", err)
 		res = new(msgDeal.Receipt).Get(common.RequestStatusError, err.Error(), imCommon.MessageTypeReceipt)
 		return res
 	}
@@ -45,7 +45,7 @@ func (m *MsgDeal) Deal(msg []byte) (res any) {
 		return res
 	default:
 		err = fmt.Errorf("request message type error")
-		logs.Error("MsgDeal-MessageType", err, data.MessageType)
+		logrus.Error("MsgDeal-MessageType", err, data.MessageType)
 		res := new(msgDeal.Receipt).Get(common.RequestStatusError, err.Error(), imCommon.MessageTypeReceipt)
 		return res
 	}

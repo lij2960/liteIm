@@ -10,10 +10,10 @@ package etcd
 import (
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"liteIm/pkg/common"
 	"liteIm/pkg/config"
-	"liteIm/pkg/logs"
 	"liteIm/pkg/utils"
 )
 
@@ -24,7 +24,7 @@ func PutApiService() {
 	lease := clientv3.NewLease(client)
 	leaseGrantResp, err := lease.Grant(context.TODO(), ttl)
 	if err != nil {
-		logs.Error("etcd-PutImService-Grant", err)
+		logrus.Error("etcd-PutImService-Grant", err)
 		return
 	}
 

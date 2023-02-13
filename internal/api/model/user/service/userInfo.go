@@ -9,8 +9,8 @@ package userService
 
 import (
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"liteIm/pkg/common"
-	"liteIm/pkg/logs"
 )
 
 type UserInfo struct {
@@ -26,10 +26,10 @@ type UserInfo struct {
 func (u *UserInfo) Set() error {
 	key := getUserInfoKey(u.UserId)
 	data, _ := json.Marshal(u)
-	logs.Info("=====", string(data))
+	logrus.Debug("=====", string(data))
 	_, err := common.RedisClient.Set(key, string(data), -1).Result()
 	if err != nil {
-		logs.Error("UserInfo-Set", err)
+		logrus.Error("UserInfo-Set", err)
 	}
 	return err
 }
@@ -39,12 +39,12 @@ func (u *UserInfo) Get(userId string) (res *UserInfo, err error) {
 	key := getUserInfoKey(userId)
 	r, err := common.RedisClient.Get(key).Result()
 	if err != nil {
-		logs.Error("UserInfo-Get", err)
+		logrus.Error("UserInfo-Get", err)
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(r), &u)
 	if err != nil {
-		logs.Error("UserInfo-Get-Unmarshal", err)
+		logrus.Error("UserInfo-Get-Unmarshal", err)
 		return nil, err
 	}
 	return u, err
@@ -55,7 +55,7 @@ func (u *UserInfo) Del(userId string) error {
 	key := getUserInfoKey(userId)
 	_, err := common.RedisClient.Del(key).Result()
 	if err != nil {
-		logs.Error("UserInfo-Del", err)
+		logrus.Error("UserInfo-Del", err)
 	}
 	return err
 }

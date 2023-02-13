@@ -9,11 +9,11 @@ package model
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 	"liteIm/internal/etcd"
 	"liteIm/internal/im/msgDeal"
 	imService "liteIm/internal/im/service"
 	"liteIm/pkg/common"
-	"liteIm/pkg/logs"
 	"liteIm/pkg/utils"
 	"net/url"
 	"strings"
@@ -53,7 +53,7 @@ func initConn(servers []string) {
 		u := url.URL{Scheme: "ws", Host: val, Path: "/ws"}
 		c, _, err := websocket.DefaultDialer.Dial(u.String()+"?unique_id="+common.ImNoCheckUserForDispatcher, nil)
 		if err != nil {
-			logs.Error("dispatcher dial err", val, err)
+			logrus.Error("dispatcher dial err", val, err)
 			continue
 		}
 		dispatcherConns = append(dispatcherConns, c)
@@ -64,22 +64,22 @@ func MsgDispatcher(uniqueId string, data []byte) {
 	// 读取im服务器
 	servers, keys := etcd.GetImService()
 	if len(servers) == 0 {
-		logs.Error("no im service")
+		logrus.Error("no im service")
 		return
 	}
 	initConn(servers)
 	updateOnlineUsers(keys)
 	if len(dispatcherConns) == 0 {
-		logs.Error("no can user dispatcher conn")
+		logrus.Error("no can user dispatcher conn")
 		return
 	}
 	// 判断用户是否在线
-	logs.Info("MsgDispatcher", onlineUser.Users, uniqueId)
+	logrus.Debug("MsgDispatcher", onlineUser.Users, uniqueId)
 	if utils.CheckInStringSlice(onlineUser.Users, uniqueId) { // 在线
 		for _, val := range dispatcherConns {
 			err := val.WriteMessage(websocket.TextMessage, data)
 			if err != nil {
-				logs.Error("dispatcher-MsgDispatcher err", err)
+				logrus.Error("dispatcher-MsgDispatcher err", err)
 				continue
 			}
 		}
@@ -95,7 +95,7 @@ func updateOnlineUsers(keys []string) {
 		//onlineUser.Lock.Lock()
 		//defer onlineUser.Lock.Unlock()
 		users, err := new(imService.OnlineUser).GetAll(keys)
-		logs.Info("updateOnlineUsers", users, err)
+		logrus.Debug("updateOnlineUsers", users, err)
 		if err == nil {
 			onlineUser.Users = users
 			onlineUser.UpdateTime = time.Now().Unix()

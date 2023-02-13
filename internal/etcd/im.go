@@ -10,10 +10,10 @@ package etcd
 import (
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/config"
-	"liteIm/pkg/logs"
 	"liteIm/pkg/utils"
 )
 
@@ -22,7 +22,7 @@ func PutImService() {
 	lease := clientv3.NewLease(client)
 	leaseGrantResp, err := lease.Grant(context.TODO(), ttl)
 	if err != nil {
-		logs.Error("etcd-PutImService-Grant", err)
+		logrus.Error("etcd-PutImService-Grant", err)
 		return
 	}
 
@@ -34,7 +34,7 @@ func GetImService() (values []string, keys []string) {
 	kv := clientv3.NewKV(client)
 	response, err := kv.Get(context.TODO(), imCommon.ImServiceKeyPre, clientv3.WithPrefix())
 	if err != nil {
-		logs.Error("etcd-GetImService", err)
+		logrus.Error("etcd-GetImService", err)
 		return
 	}
 	if response.Count > 0 {
@@ -43,7 +43,7 @@ func GetImService() (values []string, keys []string) {
 			keys = append(keys, string(val.Key))
 		}
 	} else {
-		logs.Error("etcd-GetImService-nil", response.Kvs)
+		logrus.Error("etcd-GetImService-nil", response.Kvs)
 	}
 	return values, keys
 }

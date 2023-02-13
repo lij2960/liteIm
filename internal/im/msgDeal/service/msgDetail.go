@@ -9,8 +9,8 @@ package msgDealService
 
 import (
 	"github.com/go-redis/redis"
+	"github.com/sirupsen/logrus"
 	"liteIm/pkg/common"
-	"liteIm/pkg/logs"
 )
 
 type MsgDetail struct{}
@@ -19,7 +19,7 @@ func (m *MsgDetail) Set(userId, msgId, content string) (err error) {
 	key := getOfflineUserMsgDetailKey(userId, msgId)
 	_, err = common.RedisClient.Set(key, content, expireDay7).Result()
 	if err != nil {
-		logs.Error("msgDealService-Set", err)
+		logrus.Error("msgDealService-Set", err)
 	}
 	return err
 }
@@ -30,7 +30,7 @@ func (m *MsgDetail) Get(userId, msgId string) (res string, err error) {
 	if err == redis.Nil {
 		return "", nil
 	} else if err != nil {
-		logs.Error("msgDealService-Get", err)
+		logrus.Error("msgDealService-Get", err)
 	}
 	return res, err
 }
@@ -39,6 +39,6 @@ func (m *MsgDetail) Del(userId, msgId string) {
 	key := getOfflineUserMsgDetailKey(userId, msgId)
 	_, err := common.RedisClient.Del(key).Result()
 	if err != nil {
-		logs.Error("msgDealService-Del", err)
+		logrus.Error("msgDealService-Del", err)
 	}
 }

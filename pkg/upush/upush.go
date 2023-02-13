@@ -10,9 +10,9 @@ package upush
 import (
 	"encoding/json"
 	"github.com/go-resty/resty/v2"
+	"github.com/sirupsen/logrus"
 	"liteIm/pkg/common"
 	"liteIm/pkg/config"
-	"liteIm/pkg/logs"
 	"liteIm/pkg/utils"
 	"strconv"
 	"time"
@@ -124,7 +124,7 @@ func UPushAndroid(title string, deviceToken string, extrasData map[string]string
 
 	_, err := resty.New().R().SetBody(messageAndroid).Post(url)
 	if err != nil {
-		logs.Error("UPushAndroid", err)
+		logrus.Error("UPushAndroid", err)
 	}
 }
 
@@ -206,6 +206,6 @@ func UPushIOS(title string, deviceToken string, pType int, purl string) {
 
 	_, err := resty.New().R().SetBody(messageIOS).Post(url)
 	if err != nil {
-		logs.Error("UPushIOS", err)
+		logrus.Error("UPushIOS", err)
 	}
 }

@@ -9,11 +9,11 @@ package pushMsgModel
 
 import (
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"liteIm/internal/api/model"
 	userService "liteIm/internal/api/model/user/service"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/pkg/common"
-	"liteIm/pkg/logs"
 	"strings"
 	"time"
 )
@@ -44,7 +44,7 @@ type PushDataDetail struct {
 }
 
 func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
-	logs.Info("---PushToUser-----")
+	logrus.Debug("---PushToUser-----")
 	push := &PushData{
 		DataCommon: imCommon.DataCommon{
 			MessageType: requestData.MessageType,
@@ -84,7 +84,7 @@ func (p *PushMsg) Deal(requestData *PushMsgRequest) *PushMsg {
 					push.Data.ToUniqueId = val
 					pushData, _ := json.Marshal(push)
 					//im.PushToUser(val, pushData)
-					logs.Info("------------")
+					logrus.Debug("------------")
 					model.MsgDispatcher(val, pushData)
 				}(val, push)
 			}

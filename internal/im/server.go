@@ -11,12 +11,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 	userService "liteIm/internal/api/model/user/service"
 	imCommon "liteIm/internal/im/common"
 	"liteIm/internal/im/msgDeal"
 	"liteIm/pkg/common"
 	"liteIm/pkg/config"
-	"liteIm/pkg/logs"
 	"net/http"
 	"sync"
 	"time"
@@ -27,7 +27,7 @@ type Server struct{}
 func RunWS(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		logs.Error("upgrader.Upgrade", err)
+		logrus.Error("upgrader.Upgrade", err)
 		return
 	}
 	client := new(Client).connEdit(conn)
@@ -37,7 +37,7 @@ func RunWS(w http.ResponseWriter, r *http.Request) {
 		uniqueId = query["unique_id"][0]
 	} else {
 		err = fmt.Errorf("must param for user unique id")
-		logs.Error("RunWS", err)
+		logrus.Error("RunWS", err)
 		res := new(msgDeal.Receipt).Get(common.RequestStatusError, err.Error(), imCommon.MessageTypeReceipt)
 		rr, _ := json.Marshal(res)
 		_ = pushMsg(client, rr)
@@ -90,13 +90,13 @@ func pushMsg(client *Client, data []byte) (err error) {
 	err = client.conn.SetWriteDeadline(time.Now().Add(time.Duration(writeWait) * time.Second))
 	if err != nil {
 		err = fmt.Errorf("write wait time set err")
-		logs.Error("pushMsg-SetWriteDeadline", err)
+		logrus.Error("pushMsg-SetWriteDeadline", err)
 		return err
 	}
 	err = client.conn.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
 		err = fmt.Errorf("NextWriter error")
-		logs.Error("pushMsg-WriteMessage", err)
+		logrus.Error("pushMsg-WriteMessage", err)
 		return err
 	}
 	return nil
@@ -110,14 +110,14 @@ func readMsg(uniqueId string, client *Client) {
 	_ = client.conn.SetWriteDeadline(time.Now().Add(time.Duration(readWait) * time.Second))
 	for {
 		messageType, msg, err := client.conn.ReadMessage()
-		logs.Info("message type:", messageType, string(msg))
+		logrus.Debug("message type:", messageType, string(msg))
 		if err != nil {
-			logs.Error("readMsg err:", err, uniqueId)
+			logrus.Error("readMsg err:", err, uniqueId)
 			delConnClients(uniqueId, client)
 			return
 		}
 		if messageType == websocket.PingMessage {
-			logs.Info("ping")
+			logrus.Debug("ping")
 			res := new(msgDeal.Receipt).Get(common.RequestStatusOk, "pong", imCommon.MessageTypeHeartBeat)
 			r, _ := json.Marshal(res)
 			_ = pushMsg(client, r)
@@ -133,16 +133,16 @@ func readMsg(uniqueId string, client *Client) {
 
 // PushToUser 给单用户推送消息
 func PushToUser(uniqueId string, data []byte) {
-	logs.Info("-----", uniqueId)
+	logrus.Debug("-----", uniqueId)
 	connLock.RLock()
 	defer connLock.RUnlock()
 	if client, exist := connClients[uniqueId]; !exist {
 		info := fmt.Errorf("im-getClientConn conn is not exist")
-		logs.Info(info, uniqueId)
+		logrus.Debug(info, uniqueId)
 		// 设置离线消息
 		//new(msgDeal.Offline).Set(uniqueId, string(data))
 	} else {
-		logs.Info("push msg to", uniqueId, string(data))
+		logrus.Debug("push msg to", uniqueId, string(data))
 		_ = pushMsg(client, data)
 	}
 }

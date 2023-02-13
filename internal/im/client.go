@@ -9,8 +9,8 @@ package im
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 	imService "liteIm/internal/im/service"
-	"liteIm/pkg/logs"
 	"sync"
 )
 
@@ -38,7 +38,7 @@ func addConnClients(uniqueID string, client *Client) {
 	connLock.RLock()
 	defer connLock.RUnlock()
 	connClients[uniqueID] = client
-	logs.Info("addConnClients", uniqueID)
+	logrus.Debug("addConnClients", uniqueID)
 	_ = new(imService.OnlineUser).Add(uniqueID)
 }
 
@@ -47,7 +47,7 @@ func delConnClients(uniqueID string, client *Client) {
 	connLock.RLock()
 	defer connLock.RUnlock()
 	new(Client).del(client)
-	logs.Info("disconnect client:", uniqueID)
+	logrus.Debug("disconnect client:", uniqueID)
 	_ = new(imService.OnlineUser).Del(uniqueID)
 	delete(connClients, uniqueID)
 }

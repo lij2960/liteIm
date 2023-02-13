@@ -8,8 +8,8 @@
 package msgDealService
 
 import (
+	"github.com/sirupsen/logrus"
 	"liteIm/pkg/common"
-	"liteIm/pkg/logs"
 )
 
 type MsgList struct{}
@@ -19,13 +19,13 @@ func (m *MsgList) Add(userId, msgId string) (err error) {
 	key := getOfflineUserMsgListKey(userId)
 	_, err = common.RedisClient.RPush(key, msgId).Result()
 	if err != nil {
-		logs.Error("msgDealService-RPush", err)
+		logrus.Error("msgDealService-RPush", err)
 		return err
 	}
 	// 设置key有效期
 	_, err = common.RedisClient.Expire(key, expireDay7).Result()
 	if err != nil {
-		logs.Error("msgDealService-RPush-Expire", err)
+		logrus.Error("msgDealService-RPush-Expire", err)
 	}
 	return nil
 }
@@ -35,7 +35,7 @@ func (m *MsgList) Get(userId string) (res string, err error) {
 	key := getOfflineUserMsgListKey(userId)
 	res, err = common.RedisClient.LPop(key).Result()
 	if err != nil {
-		logs.Error("msgDealService-RPush", err)
+		logrus.Error("msgDealService-RPush", err)
 		return "", err
 	}
 	return res, nil
@@ -46,7 +46,7 @@ func (m *MsgList) Exist(userId string) (res int64, err error) {
 	key := getOfflineUserMsgListKey(userId)
 	res, err = common.RedisClient.Exists(key).Result()
 	if err != nil {
-		logs.Error("msgDealService-RPush", err)
+		logrus.Error("msgDealService-RPush", err)
 		return 0, err
 	}
 	return res, nil
@@ -57,7 +57,7 @@ func (m *MsgList) Len(userId string) (res int64, err error) {
 	key := getOfflineUserMsgListKey(userId)
 	res, err = common.RedisClient.LLen(key).Result()
 	if err != nil {
-		logs.Error("msgDealService-RPush", err)
+		logrus.Error("msgDealService-RPush", err)
 		return 0, err
 	}
 	return res, nil
